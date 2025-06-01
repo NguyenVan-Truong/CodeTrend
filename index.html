@@ -3,15 +3,18 @@
   <head>
     <link rel="shortcut icon" href="image.jpg" type="image/x-icon" />
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=5"
+    />
     <title>Nguyễn Văn Trường</title>
     <style>
       body {
         margin: 0;
         background: black;
-        overflow: hidden;
-        perspective: 1000px;
         font-family: "Arial", sans-serif;
+        perspective: 1000px;
+        touch-action: manipulation;
       }
 
       .stars {
@@ -35,16 +38,15 @@
       }
 
       .scene {
-        position: absolute;
-        top: 50%;
-        left: 50%;
+        position: fixed;
+        top: 0;
+        left: 0;
         width: 100vw;
         height: 100vh;
         transform-style: preserve-3d;
         transition: transform 0.1s linear;
-        transform: translate(-50%, -50%) rotateX(0deg) rotateY(0deg);
-        overflow: visible;
         z-index: 1;
+        overflow: visible;
       }
 
       .falling-text,
@@ -74,8 +76,35 @@
           opacity: 1;
         }
         100% {
-          transform: translateY(110vh) translateZ(var(--z));
+          transform: translateY(130vh) translateZ(var(--z));
           opacity: 0;
+        }
+      }
+
+      .marquee {
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        color: #ff69b4;
+        font-size: 20px;
+        white-space: nowrap;
+        overflow: hidden;
+        z-index: 9999;
+      }
+
+      .marquee-text {
+        display: inline-block;
+        padding-left: 100%;
+        animation: scroll-left 20s linear infinite;
+      }
+
+      @keyframes scroll-left {
+        0% {
+          transform: translateX(0%);
+        }
+        100% {
+          transform: translateX(-100%);
         }
       }
     </style>
@@ -83,6 +112,12 @@
   <body>
     <div class="stars"></div>
     <div class="scene" id="scene"></div>
+    <div class="marquee">
+      <div class="marquee-text">
+        Anh yêu em hơn tất cả vì em là ánh sáng trong đời anh 💖 Em là tất cả 💖
+        Anh nguyện yêu em mãi mãi 💖
+      </div>
+    </div>
 
     <script>
       const phrases = [
@@ -135,11 +170,10 @@
         scene.appendChild(div);
       }
 
-      // Tạo icon trái tim rơi
       function createHeart(delay) {
         const div = document.createElement("div");
         div.classList.add("falling-heart");
-        div.textContent = "❤️"; // bạn có thể đổi thành "💖" hoặc icon khác
+        div.textContent = "💖";
         div.style.left = `${Math.random() * 90}vw`;
         div.style.color =
           pinkShades[Math.floor(Math.random() * pinkShades.length)];
@@ -149,25 +183,27 @@
         scene.appendChild(div);
       }
 
-      // Tạo cả phrases + hearts xen kẽ nhau
       phrases.forEach((phrase, i) => {
         for (let j = 0; j < 6; j++) {
           createText(phrase, j * 3 + Math.random());
-          createHeart(j * 3 + Math.random() + 1.5); // delay trái tim lệch với text một chút để không rơi cùng lúc
+          createHeart(j * 3 + Math.random() + 1.5);
         }
       });
 
-      // Xoay theo kéo chuột & cảm ứng
+      // Xoay bằng chuột và cảm ứng
       let isDragging = false;
       let startX = 0,
         startY = 0;
       let currentX = 0,
         currentY = 0;
 
-      let isTouching = false;
-      let touchStartX = 0,
-        touchStartY = 0;
+      function updateRotation(dx, dy) {
+        currentX += dx * 0.1;
+        currentY += dy * 0.1;
+        scene.style.transform = `rotateX(${currentY}deg) rotateY(${currentX}deg)`;
+      }
 
+      // Chuột
       document.addEventListener("mousedown", (e) => {
         isDragging = true;
         startX = e.clientX;
@@ -182,41 +218,27 @@
         if (!isDragging) return;
         const dx = e.clientX - startX;
         const dy = e.clientY - startY;
-
-        currentX += dx * 0.1;
-        currentY += dy * 0.1;
-
-        scene.style.transform = `translate(-50%, -50%) rotateX(${currentY}deg) rotateY(${currentX}deg)`;
-
+        updateRotation(dx, dy);
         startX = e.clientX;
         startY = e.clientY;
       });
 
-      // Touch event cho điện thoại
+      // Cảm ứng
       document.addEventListener("touchstart", (e) => {
-        isTouching = true;
-        touchStartX = e.touches[0].clientX;
-        touchStartY = e.touches[0].clientY;
-      });
-
-      document.addEventListener("touchend", () => {
-        isTouching = false;
+        if (e.touches.length === 1) {
+          startX = e.touches[0].clientX;
+          startY = e.touches[0].clientY;
+        }
       });
 
       document.addEventListener("touchmove", (e) => {
-        if (!isTouching) return;
-        const dx = e.touches[0].clientX - touchStartX;
-        const dy = e.touches[0].clientY - touchStartY;
-
-        currentX += dx * 0.1;
-        currentY += dy * 0.1;
-
-        scene.style.transform = `translate(-50%, -50%) rotateX(${currentY}deg) rotateY(${currentX}deg)`;
-
-        touchStartX = e.touches[0].clientX;
-        touchStartY = e.touches[0].clientY;
-
-        e.preventDefault();
+        if (e.touches.length === 1) {
+          const dx = e.touches[0].clientX - startX;
+          const dy = e.touches[0].clientY - startY;
+          updateRotation(dx, dy);
+          startX = e.touches[0].clientX;
+          startY = e.touches[0].clientY;
+        }
       });
     </script>
   </body>
