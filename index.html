@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <link rel="shortcut icon" href="image.jpg" type="image/x-icon" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nguyễn Văn Trường</title>
+    <style>
+      body {
+        margin: 0;
+        background: black;
+        overflow: hidden;
+        perspective: 1000px;
+        font-family: "Arial", sans-serif;
+      }
+
+      .stars {
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(#ffffff 1px, transparent 1px);
+        background-size: 60px 60px;
+        z-index: 0;
+        animation: twinkle 10s linear infinite;
+      }
+
+      @keyframes twinkle {
+        0%,
+        100% {
+          opacity: 0.8;
+        }
+        50% {
+          opacity: 0.4;
+        }
+      }
+
+      .scene {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        transform-style: preserve-3d;
+        transition: transform 0.1s linear;
+      }
+
+      .falling-text,
+      .falling-heart {
+        position: absolute;
+        white-space: nowrap;
+        font-weight: bold;
+        font-size: 24px;
+        animation: fall linear infinite;
+        text-shadow: 0 0 10px #ff69b4;
+        user-select: none;
+        pointer-events: none;
+      }
+
+      .falling-heart {
+        font-size: 30px;
+        text-shadow: 0 0 15px #ff1493, 0 0 20px #ff69b4;
+        animation-duration: 7s;
+      }
+
+      @keyframes fall {
+        0% {
+          transform: translateY(-100px) translateZ(var(--z));
+          opacity: 0;
+        }
+        10% {
+          opacity: 1;
+        }
+        100% {
+          transform: translateY(110vh) translateZ(var(--z));
+          opacity: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="stars"></div>
+    <div class="scene" id="scene"></div>
+
+    <script>
+      const phrases = [
+        "Anh yêu em hơn cả ngôn từ có thể diễn tả.",
+        "Gặp em là điều tuyệt vời nhất đời anh.",
+        "Em là giấc mơ mà anh không muốn tỉnh dậy.",
+        "Chỉ cần em gật đầu, anh sẽ đến hết đời.",
+        "Chúng ta sinh ra là để dành cho nhau.",
+        "Anh không cần gì nhiều, chỉ cần em.",
+        "Nếu có 1 điều ước, anh ước có em mãi mãi.",
+        "Em chính là định mệnh của đời anh.",
+        "Từ khi có em, thế giới của anh bừng sáng.",
+        "Mỗi lần nhìn thấy em, tim anh lỡ nhịp.",
+        "Em là lý do để anh mỉm cười mỗi ngày.",
+        "Trái tim anh đã thuộc về em từ lâu.",
+        "Anh nguyện bên em cả đời.",
+        "Gặp em là cái duyên, yêu em là định mệnh.",
+        "Em là nguồn cảm hứng trong cuộc sống anh.",
+        "Chỉ cần em cười, mọi thứ đều đáng giá.",
+        "Từng giây phút bên em là điều anh trân trọng.",
+        "Em làm trái tim anh tan chảy.",
+        "Tìm anh đã khóa, và em là chìa khóa.",
+        "Anh không thể ngừng nghĩ về em.",
+        "Em là tất cả những gì anh cần.",
+      ];
+
+      const scene = document.getElementById("scene");
+      const pinkShades = [
+        "#ffc0cb",
+        "#ff69b4",
+        "#ffb6c1",
+        "#ff85a2",
+        "#ff94d4",
+        "#ffaad4",
+        "#ff7eb9",
+        "#fd8ecb",
+        "#fda3d6",
+      ];
+
+      function createText(phrase, delay) {
+        const div = document.createElement("div");
+        div.classList.add("falling-text");
+        div.textContent = phrase;
+        div.style.left = `${Math.random() * 90}vw`;
+        div.style.color =
+          pinkShades[Math.floor(Math.random() * pinkShades.length)];
+        div.style.animationDuration = `${6 + Math.random() * 4}s`;
+        div.style.animationDelay = `${delay}s`;
+        div.style.setProperty("--z", `${-300 + Math.random() * 600}px`);
+        scene.appendChild(div);
+      }
+
+      // Tạo icon trái tim rơi
+      function createHeart(delay) {
+        const div = document.createElement("div");
+        div.classList.add("falling-heart");
+        div.textContent = "❤️"; // bạn có thể đổi thành "💖" hoặc icon khác
+        div.style.left = `${Math.random() * 90}vw`;
+        div.style.color =
+          pinkShades[Math.floor(Math.random() * pinkShades.length)];
+        div.style.animationDuration = `${6 + Math.random() * 4}s`;
+        div.style.animationDelay = `${delay}s`;
+        div.style.setProperty("--z", `${-300 + Math.random() * 600}px`);
+        scene.appendChild(div);
+      }
+
+      // Tạo cả phrases + hearts xen kẽ nhau
+      phrases.forEach((phrase, i) => {
+        for (let j = 0; j < 6; j++) {
+          createText(phrase, j * 3 + Math.random());
+          createHeart(j * 3 + Math.random() + 1.5); // delay trái tim lệch với text một chút để không rơi cùng lúc
+        }
+      });
+
+      // Xoay theo kéo chuột
+      let isDragging = false;
+      let startX = 0,
+        startY = 0;
+      let currentX = 0,
+        currentY = 0;
+
+      document.addEventListener("mousedown", (e) => {
+        isDragging = true;
+        startX = e.clientX;
+        startY = e.clientY;
+      });
+
+      document.addEventListener("mouseup", () => {
+        isDragging = false;
+      });
+
+      document.addEventListener("mousemove", (e) => {
+        if (!isDragging) return;
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+
+        currentX += dx * 0.1;
+        currentY += dy * 0.1;
+
+        scene.style.transform = `rotateX(${currentY}deg) rotateY(${currentX}deg)`;
+
+        startX = e.clientX;
+        startY = e.clientY;
+      });
+    </script>
+  </body>
+</html>
